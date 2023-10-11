@@ -48,3 +48,4 @@ override.tf.json
 
 .idea
 *.hcl
+solutions
