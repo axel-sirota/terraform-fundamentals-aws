@@ -50,3 +50,4 @@ override.tf.json
 *.hcl
 solutions
 terraform.tfstate.d
+solution-experimentation
