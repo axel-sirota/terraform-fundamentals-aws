@@ -118,7 +118,7 @@ resource "aws_s3_bucket" "student_buckets" {
 
 You get that name and run:
 
-`aws s3 list`
+`aws s3 ls`
 
 and it returns a resource.
 
@@ -223,7 +223,7 @@ resource "aws_s3_bucket" "student_buckets" {
 
 You get that name and run:
 
-`aws s3 list`
+`aws s3 ls`
 
 and it returns a resource.
 
