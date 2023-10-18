@@ -1,7 +1,7 @@
 #!/bin/bash
 
 values=$(terraform output -json)
-
+passwords=()
 let i=0
 for username in $(echo $values | jq -r '.students.value[].name'); do
   for loop in 1; do
@@ -20,4 +20,6 @@ for username in $(echo $values | jq -r '.students.value[].name'); do
 	echo ""
 	let i=i+1
   done > tf-user$i
+  passwords+=("$password")
 done
+echo "${passwords[@]}"

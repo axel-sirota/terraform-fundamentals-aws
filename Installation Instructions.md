@@ -63,7 +63,7 @@ terraform {
   required_version = "~>1.4"
 
   required_providers {
-    azurerm = {
+    aws = {
       source = "hashicorp/aws"
       version = "~>5.20"
     }
@@ -75,7 +75,7 @@ terraform {
 }
 
 provider "aws" {
-  region = us-east-1
+  region = "us-east-1"
 }
 ```
 
@@ -168,7 +168,7 @@ terraform {
   required_version = "~>1.4"
 
   required_providers {
-    azurerm = {
+    aws = {
       source = "hashicorp/aws"
       version = "~>5.20"
     }
@@ -180,7 +180,7 @@ terraform {
 }
 
 provider "aws" {
-  region = us-east-1
+  region = "us-east-1"
 }
 ```
 

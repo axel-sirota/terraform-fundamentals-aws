@@ -1,25 +1,31 @@
 terraform {
+  required_version = ">=1.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~>5.20"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~>3.5.1"
     }
   }
 }
 
 provider "aws" {
-  region = "us-west-2"
+  region = "us-west-1"
+  profile = "diaxel"
 }
 
-provider "aws" {
-  alias  = "ohio"
-  region = "us-east-2"
+resource "random_integer" "rand" {
+  max = 10000
+  min = 1
 }
 
 resource "aws_s3_bucket" "student_buckets" {
   count         = length(var.students)
-  bucket        = "devint-${var.students[count.index].name}"
-  provider      = aws.ohio
+  bucket        = "devint-${var.students[count.index].name}-${random_integer.rand.result}"
   force_destroy = true
 }
 
@@ -103,6 +109,8 @@ EOF
   depends_on = [aws_iam_user.students]
 }
 
+
+
 resource "aws_iam_policy" "student_ec2_access" {
   depends_on = [aws_iam_user.students]
   name        = "StudentEC2Access"
@@ -169,6 +177,41 @@ resource "aws_iam_policy" "student_ec2_access" {
 EOF
 }
 
+
+resource "aws_iam_policy" "student_ssm_get_access" {
+  depends_on = [aws_iam_user.students]
+  name        = "StudentSSMAccess"
+  description = "Allowing student access to SSM accordingly"
+  policy      = <<EOF
+{
+"Version": "2012-10-17",
+"Statement": [
+    {
+        "Effect": "Allow",
+        "Action":[
+            "ssm:DescribeParameters"
+        ],
+        "Resource": "*"
+    },
+    {
+        "Effect": "Allow",
+        "Action":[
+            "ssm:GetParameter*"
+        ],
+        "Resource": "arn:aws:ssm:us-east-1::parameter/*"
+    },
+    {
+        "Effect": "Allow",
+        "Action": [
+            "kms:Decrypt"
+        ],
+        "Resource": "arn:aws:kms:us-east-1::key/*"
+    }
+]
+}
+EOF
+}
+
 resource "aws_iam_policy" "student_credentials_access" {
   depends_on = [aws_iam_user.students]
   name        = "StudentIAMCredentialsAccess"
@@ -202,6 +245,58 @@ resource "aws_iam_policy" "student_credentials_access" {
 EOF
 }
 
+
+resource "aws_iam_policy" "student_roles_access" {
+  depends_on = [aws_iam_user.students]
+  name        = "StudentIAMRolesAccess"
+  description = "Allowing student to create and assign roles "
+  policy      = <<EOF
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:CreatePolicy",
+				"iam:CreateInstanceProfile",
+				"iam:DeleteInstanceProfile",
+				"iam:GetRole",
+				"iam:PassRole",
+                "iam:TagRole",
+                "iam:ListRolePolicies",
+                "iam:ListAttachedRolePolicies",
+                "iam:ListInstanceProfilesForRole",
+                "iam:TagInstanceProfile",
+                "iam:PutRolePolicy",
+                "iam:GetInstanceProfile",
+                "iam:RemoveRoleFromInstanceProfile",
+                "iam:DeleteRolePolicy",
+				"iam:GetPolicy",
+				"iam:DeletePolicy",
+				"iam:CreateRole",
+				"iam:DeleteRole",
+				"iam:GetRolePolicy",
+				"iam:AddRoleToInstanceProfile"
+			],
+			"Resource": [
+				"arn:aws:iam::535146832369:policy/*",
+				"arn:aws:iam::535146832369:role/*",
+				"arn:aws:iam::535146832369:instance-profile/*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:ListPolicies",
+				"iam:ListRoles"
+			],
+			"Resource": "*"
+		}
+	]
+}
+EOF
+}
+
 resource "aws_iam_user_policy_attachment" "student_bucket_access" {
   count      = length(var.students)
   user       = var.students[count.index].name
@@ -220,6 +315,19 @@ resource "aws_iam_user_policy_attachment" "student_credentials_access" {
   count      = length(var.students)
   user       = var.students[count.index].name
   policy_arn = aws_iam_policy.student_credentials_access.arn
+  depends_on = [aws_iam_user.students]
+}
+
+resource "aws_iam_user_policy_attachment" "student_ssm_access_attachment" {
+  count      = length(var.students)
+  user       = var.students[count.index].name
+  policy_arn = aws_iam_policy.student_ssm_get_access.arn
+  depends_on = [aws_iam_user.students]
+}
+resource "aws_iam_user_policy_attachment" "student_roles_attachment" {
+  count      = length(var.students)
+  user       = var.students[count.index].name
+  policy_arn = aws_iam_policy.student_roles_access.arn
   depends_on = [aws_iam_user.students]
 }
 
@@ -250,4 +358,11 @@ resource "aws_iam_user_policy_attachment" "s3_user_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
   depends_on = [aws_iam_user.students]
 }
+resource "aws_iam_user_policy_attachment" "ec2_user_access" {
+  count      = length(var.students)
+  user       = var.students[count.index].name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+  depends_on = [aws_iam_user.students]
+}
+
 
