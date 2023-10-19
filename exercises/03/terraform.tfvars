@@ -1,1 +1,1 @@
-instance_prefix_name  = "[student-name]"
+instance_prefix_name = "[student-name]"

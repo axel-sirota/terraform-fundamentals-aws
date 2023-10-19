@@ -14,7 +14,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-west-1"
+  region  = "us-west-1"
   profile = "diaxel"
 }
 
@@ -112,7 +112,7 @@ EOF
 
 
 resource "aws_iam_policy" "student_ec2_access" {
-  depends_on = [aws_iam_user.students]
+  depends_on  = [aws_iam_user.students]
   name        = "StudentEC2Access"
   description = "Allowing student access to EC2 accordingly"
   policy      = <<EOF
@@ -179,7 +179,7 @@ EOF
 
 
 resource "aws_iam_policy" "student_ssm_get_access" {
-  depends_on = [aws_iam_user.students]
+  depends_on  = [aws_iam_user.students]
   name        = "StudentSSMAccess"
   description = "Allowing student access to SSM accordingly"
   policy      = <<EOF
@@ -213,7 +213,7 @@ EOF
 }
 
 resource "aws_iam_policy" "student_credentials_access" {
-  depends_on = [aws_iam_user.students]
+  depends_on  = [aws_iam_user.students]
   name        = "StudentIAMCredentialsAccess"
   description = "Allowing student to rotate and manage their own credentials"
   policy      = <<EOF
@@ -247,7 +247,7 @@ EOF
 
 
 resource "aws_iam_policy" "student_roles_access" {
-  depends_on = [aws_iam_user.students]
+  depends_on  = [aws_iam_user.students]
   name        = "StudentIAMRolesAccess"
   description = "Allowing student to create and assign roles "
   policy      = <<EOF
