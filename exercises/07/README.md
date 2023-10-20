@@ -9,7 +9,7 @@ Providers are plugins that Terraform uses to understand various external APIs an
 1. Add a new provider block to `providers.tf` just under the existing provider block. To make this work you need to set the region at least. You also need to set a `alias` argument to the alternate provider. Something like
 
  ```hcl
- provider "provider-name" {
+ provider "provider-name" {   // change provider-name to the actual provider name
      features {}
      alias = "alternate"
  }
@@ -19,7 +19,7 @@ Providers are plugins that Terraform uses to understand various external APIs an
 
 
  ```hcl
-  provider = azurerm.alternate
+  provider = provider-name.alternate    // change provider-name to the actual provider name
  ```
 
 3. Now, provision all:
